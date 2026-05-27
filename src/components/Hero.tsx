@@ -383,15 +383,7 @@ export default function Hero({ onScrollToSection }: HeroProps) {
           
           {/* Hero Left: Headlines & CTA */}
           <div className="lg:col-span-6 flex flex-col text-center lg:text-left items-center lg:items-start">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-apron-caramel/20 bg-apron-peach/60 backdrop-blur-md text-xs font-semibold text-apron-caramel tracking-wide uppercase mb-6"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Award-Winning Artisan Patisserie
-            </motion.div>
+
 
             <h1 className="font-serif text-5xl md:text-7xl font-bold tracking-tight text-apron-charcoal leading-[1.05] mb-6">
               <span className="block overflow-hidden relative">
