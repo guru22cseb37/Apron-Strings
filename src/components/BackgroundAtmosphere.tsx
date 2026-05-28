@@ -61,13 +61,15 @@ export default function BackgroundAtmosphere() {
             x: [0, 80, -40, 0],
             y: [0, -60, 40, 0],
             scale: [1, 1.15, 0.9, 1],
-            background: `radial-gradient(circle, ${colors.spot1} 0%, rgba(255, 255, 255, 0) 70%)`
           }}
           transition={{
             x: { duration: 25, repeat: Infinity, ease: "easeInOut" },
             y: { duration: 25, repeat: Infinity, ease: "easeInOut" },
             scale: { duration: 25, repeat: Infinity, ease: "easeInOut" },
-            background: { duration: 1.5, ease: "easeInOut" } // Velvet scent shift transition
+          }}
+          style={{
+            background: `radial-gradient(circle, ${colors.spot1} 0%, rgba(255, 255, 255, 0) 70%)`,
+            transition: "background 1.5s ease-in-out",
           }}
           className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[110px]"
         />
@@ -78,13 +80,15 @@ export default function BackgroundAtmosphere() {
             x: [0, -90, 50, 0],
             y: [0, 70, -30, 0],
             scale: [1, 0.9, 1.1, 1],
-            background: `radial-gradient(circle, ${colors.spot2} 0%, rgba(255, 255, 255, 0) 70%)`
           }}
           transition={{
             x: { duration: 28, repeat: Infinity, ease: "easeInOut" },
             y: { duration: 28, repeat: Infinity, ease: "easeInOut" },
             scale: { duration: 28, repeat: Infinity, ease: "easeInOut" },
-            background: { duration: 1.5, ease: "easeInOut" }
+          }}
+          style={{
+            background: `radial-gradient(circle, ${colors.spot2} 0%, rgba(255, 255, 255, 0) 70%)`,
+            transition: "background 1.5s ease-in-out",
           }}
           className="absolute -bottom-48 -right-48 w-[700px] h-[700px] rounded-full blur-[125px]"
         />
@@ -95,13 +99,15 @@ export default function BackgroundAtmosphere() {
             x: [0, 50, -50, 0],
             y: [0, 50, -50, 0],
             scale: [1, 1.1, 0.95, 1],
-            background: `radial-gradient(circle, ${colors.spot3} 0%, rgba(255, 255, 255, 0) 70%)`
           }}
           transition={{
             x: { duration: 22, repeat: Infinity, ease: "easeInOut" },
             y: { duration: 22, repeat: Infinity, ease: "easeInOut" },
             scale: { duration: 22, repeat: Infinity, ease: "easeInOut" },
-            background: { duration: 1.5, ease: "easeInOut" }
+          }}
+          style={{
+            background: `radial-gradient(circle, ${colors.spot3} 0%, rgba(255, 255, 255, 0) 70%)`,
+            transition: "background 1.5s ease-in-out",
           }}
           className="absolute top-1/3 left-1/4 w-[550px] h-[550px] rounded-full blur-[105px]"
         />
@@ -112,13 +118,15 @@ export default function BackgroundAtmosphere() {
             x: [0, -60, 40, 0],
             y: [0, 80, -40, 0],
             scale: [1, 1.05, 0.9, 1],
-            background: `radial-gradient(circle, ${colors.spot4} 0%, rgba(255, 255, 255, 0) 70%)`
           }}
           transition={{
             x: { duration: 32, repeat: Infinity, ease: "easeInOut" },
             y: { duration: 32, repeat: Infinity, ease: "easeInOut" },
             scale: { duration: 32, repeat: Infinity, ease: "easeInOut" },
-            background: { duration: 1.5, ease: "easeInOut" }
+          }}
+          style={{
+            background: `radial-gradient(circle, ${colors.spot4} 0%, rgba(255, 255, 255, 0) 70%)`,
+            transition: "background 1.5s ease-in-out",
           }}
           className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]"
         />

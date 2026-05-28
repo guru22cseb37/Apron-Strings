@@ -141,6 +141,22 @@ export default function AromaVisualizer() {
       }
     };
 
+    // Pre-render a single smooth droplet puff/mist onto an offscreen canvas sprite
+    const spriteCanvas = document.createElement("canvas");
+    spriteCanvas.width = 64;
+    spriteCanvas.height = 64;
+    const sCtx = spriteCanvas.getContext("2d");
+    if (sCtx) {
+      const grad = sCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, getDropletColor(aromaProfile, 1.0));
+      grad.addColorStop(0.5, getDropletColor(aromaProfile, 0.35));
+      grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      sCtx.fillStyle = grad;
+      sCtx.beginPath();
+      sCtx.arc(32, 32, 32, 0, Math.PI * 2);
+      sCtx.fill();
+    }
+
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
 
@@ -163,15 +179,14 @@ export default function AromaVisualizer() {
         }
 
         ctx.save();
-        ctx.beginPath();
-        const grad = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.size);
-        grad.addColorStop(0, getDropletColor(aromaProfile, d.alpha));
-        grad.addColorStop(0.5, getDropletColor(aromaProfile, d.alpha * 0.35));
-        grad.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-        ctx.fillStyle = grad;
-        ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.globalAlpha = d.alpha;
+        ctx.drawImage(
+          spriteCanvas,
+          d.x - d.size,
+          d.y - d.size,
+          d.size * 2,
+          d.size * 2
+        );
         ctx.restore();
       }
 

@@ -9,38 +9,39 @@ interface HeroProps {
   onScrollToSection: (sectionId: string) => void;
 }
 
+const VIDEO_TRACKS = [
+  {
+    title: "Chapter I: Sifting Happiness",
+    description: "Sifting organic heritage flour in slow motion to create the perfect crumb architecture.",
+    src: "/hero-loop.mp4",
+    image: "/images/hero-cake.png",
+  },
+  {
+    title: "Chapter II: Chocolate Sculpting",
+    description: "Our pastry chefs frosting and layering 70% dark Valrhona chocolate blocks.",
+    src: "/hero-loop.mp4",
+    image: "/images/menu-chocolate-cake.png",
+  },
+  {
+    title: "Chapter III: Strawberry Glacage",
+    description: "Glazing fresh organic hand-picked berries on the velvet crème pâtissière.",
+    src: "/hero-loop.mp4",
+    image: "/images/menu-strawberry-pastry.png",
+  }
+];
+
 export default function Hero({ onScrollToSection }: HeroProps) {
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const steamCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const { ambientAudio, setAmbientAudio } = useApp();
 
   // Living dashboard direct loop states
   const [activeVideoTrack, setActiveVideoTrack] = useState(0);
   const [videoError, setVideoError] = useState(false);
-
-  const VIDEO_TRACKS = [
-    {
-      title: "Chapter I: Sifting Happiness",
-      description: "Sifting organic heritage flour in slow motion to create the perfect crumb architecture.",
-      src: "/hero-loop.mp4",
-      image: "/images/hero-cake.png",
-    },
-    {
-      title: "Chapter II: Chocolate Sculpting",
-      description: "Our pastry chefs frosting and layering 70% dark Valrhona chocolate blocks.",
-      src: "/hero-loop.mp4",
-      image: "/images/menu-chocolate-cake.png",
-    },
-    {
-      title: "Chapter III: Strawberry Glacage",
-      description: "Glazing fresh organic hand-picked berries on the velvet crème pâtissière.",
-      src: "/hero-loop.mp4",
-      image: "/images/menu-strawberry-pastry.png",
-    }
-  ];
 
   const handleNextTrack = () => {
     setVideoError(false);
@@ -52,23 +53,14 @@ export default function Hero({ onScrollToSection }: HeroProps) {
     setActiveVideoTrack(idx);
   };
 
-  // Live "Next Batch" countdown timer — resets every 3 hours from midnight
-  const [countdown, setCountdown] = useState("");
+  // Autoplay and trigger video play when active track changes
   useEffect(() => {
-    const computeCountdown = () => {
-      const now = new Date();
-      const secondsInDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const batchInterval = 3 * 3600; // every 3 hours
-      const secsUntilNext = batchInterval - (secondsInDay % batchInterval);
-      const h = Math.floor(secsUntilNext / 3600);
-      const m = Math.floor((secsUntilNext % 3600) / 60);
-      const s = secsUntilNext % 60;
-      setCountdown(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
-    };
-    computeCountdown();
-    const id = setInterval(computeCountdown, 1000);
-    return () => clearInterval(id);
-  }, []);
+    if (videoRef.current) {
+      videoRef.current.play().catch((err) => {
+        console.warn("Video autoplay failed or was prevented:", err);
+      });
+    }
+  }, [activeVideoTrack]);
 
   // Mouse positions for 3D parallax layers
   const mouseX = useMotionValue(0);
@@ -162,16 +154,10 @@ export default function Hero({ onScrollToSection }: HeroProps) {
       }
 
       draw(c: CanvasRenderingContext2D) {
-        c.save();
         c.beginPath();
-        c.translate(this.x, this.y);
-        c.rotate(this.spin);
         c.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        
-        // Draw little star/fluffy sugar circle
-        c.arc(0, 0, this.size, 0, Math.PI * 2);
+        c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         c.fill();
-        c.restore();
       }
     }
 
@@ -190,21 +176,6 @@ export default function Hero({ onScrollToSection }: HeroProps) {
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-
-      // Background ambient gradient overlays
-      const grad = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        10,
-        width / 2,
-        height / 2,
-        width
-      );
-      grad.addColorStop(0, "rgba(255, 243, 236, 0.4)");
-      grad.addColorStop(0.5, "rgba(252, 250, 246, 0.3)");
-      grad.addColorStop(1, "rgba(246, 236, 224, 0.1)");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
 
       // Render sugar dust
       sugarDists.forEach((p) => {
@@ -235,6 +206,22 @@ export default function Hero({ onScrollToSection }: HeroProps) {
     let animationFrameId: number;
     let width = (canvas.width = 240);
     let height = (canvas.height = 120);
+
+    // Pre-render a single smooth steam puff onto an offscreen canvas sprite
+    const spriteCanvas = document.createElement("canvas");
+    spriteCanvas.width = 64;
+    spriteCanvas.height = 64;
+    const sCtx = spriteCanvas.getContext("2d");
+    if (sCtx) {
+      const grad = sCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, "rgba(255, 253, 250, 1.0)");
+      grad.addColorStop(0.5, "rgba(255, 253, 250, 0.4)");
+      grad.addColorStop(1, "rgba(255, 253, 250, 0)");
+      sCtx.fillStyle = grad;
+      sCtx.beginPath();
+      sCtx.arc(32, 32, 32, 0, Math.PI * 2);
+      sCtx.fill();
+    }
 
     class SteamParticle {
       x: number = 0;
@@ -287,21 +274,14 @@ export default function Hero({ onScrollToSection }: HeroProps) {
 
       draw(c: CanvasRenderingContext2D) {
         c.save();
-        c.beginPath();
-        const grad = c.createRadialGradient(
-          this.x,
-          this.y,
-          0,
-          this.x,
-          this.y,
-          this.size
+        c.globalAlpha = this.alpha;
+        c.drawImage(
+          spriteCanvas,
+          this.x - this.size,
+          this.y - this.size,
+          this.size * 2,
+          this.size * 2
         );
-        grad.addColorStop(0, `rgba(255, 253, 250, ${this.alpha})`);
-        grad.addColorStop(0.5, `rgba(255, 253, 250, ${this.alpha * 0.4})`);
-        grad.addColorStop(1, `rgba(255, 253, 250, 0)`);
-        c.fillStyle = grad;
-        c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        c.fill();
         c.restore();
       }
     }
@@ -449,39 +429,24 @@ export default function Hero({ onScrollToSection }: HeroProps) {
             </motion.div>
 
             {/* Live Baked Fresh Timer */}
-            {countdown && (
-              <div className="flex flex-wrap items-center gap-4 mt-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.6 }}
-                  className="inline-flex items-center gap-2 py-2 px-4 rounded-full border border-apron-caramel/20 bg-apron-peach/50 backdrop-blur-sm text-apron-caramel"
-                >
-                  <Clock className="w-3.5 h-3.5 animate-pulse" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wide">
-                    Next fresh batch in
-                  </span>
-                  <span className="font-mono text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full border border-white">
-                    {countdown}
-                  </span>
-                </motion.div>
+            <div className="flex flex-wrap items-center gap-4 mt-6">
+              <CountdownTimer />
 
-                {/* Secondary Video Controller button */}
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.8 }}
-                  onClick={handleNextTrack}
-                  className="inline-flex items-center gap-2 py-2 px-4 rounded-full border border-white/80 bg-white/40 hover:bg-white/90 text-apron-caramel hover:text-apron-gold hover:border-apron-caramel/30 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider transition-all shadow-3xs cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  Switch Baking Loop
-                </motion.button>
-              </div>
-            )}
+              {/* Secondary Video Controller button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.8 }}
+                onClick={handleNextTrack}
+                className="inline-flex items-center gap-2 py-2 px-4 rounded-full border border-white/80 bg-white/40 hover:bg-white/90 text-apron-caramel hover:text-apron-gold hover:border-apron-caramel/30 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider transition-all shadow-3xs cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Switch Baking Loop
+              </motion.button>
+            </div>
           </div>
 
           {/* Hero Right: 3D Floating Cake Showcase */}
@@ -533,12 +498,13 @@ export default function Hero({ onScrollToSection }: HeroProps) {
               >
                 {!videoError ? (
                   <video
-                    key={activeVideoTrack}
+                    ref={videoRef}
                     src={VIDEO_TRACKS[activeVideoTrack].src}
                     autoPlay
                     loop
                     muted
                     playsInline
+                    preload="auto"
                     onError={() => setVideoError(true)}
                     className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 pointer-events-none"
                   />
@@ -642,6 +608,46 @@ export default function Hero({ onScrollToSection }: HeroProps) {
 
       {/* Hero section ends here */}
     </>
+  );
+}
+
+// Isolated countdown timer component that updates second-by-second
+function CountdownTimer() {
+  const [countdown, setCountdown] = useState("");
+
+  useEffect(() => {
+    const computeCountdown = () => {
+      const now = new Date();
+      const secondsInDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const batchInterval = 3 * 3600; // every 3 hours
+      const secsUntilNext = batchInterval - (secondsInDay % batchInterval);
+      const h = Math.floor(secsUntilNext / 3600);
+      const m = Math.floor((secsUntilNext % 3600) / 60);
+      const s = secsUntilNext % 60;
+      setCountdown(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    };
+    computeCountdown();
+    const id = setInterval(computeCountdown, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!countdown) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.6 }}
+      className="inline-flex items-center gap-2 py-2 px-4 rounded-full border border-apron-caramel/20 bg-apron-peach/50 backdrop-blur-sm text-apron-caramel"
+    >
+      <Clock className="w-3.5 h-3.5 animate-pulse" />
+      <span className="text-[10px] font-semibold uppercase tracking-wide">
+        Next fresh batch in
+      </span>
+      <span className="font-mono text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full border border-white">
+        {countdown}
+      </span>
+    </motion.div>
   );
 }
 
