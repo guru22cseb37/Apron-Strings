@@ -37,9 +37,10 @@ const FacebookIcon = ({ className }: { className?: string }) => (
 
 interface FooterProps {
   onScrollToSection: (sectionId: string) => void;
+  onOpenAdmin: () => void;
 }
 
-export default function Footer({ onScrollToSection }: FooterProps) {
+export default function Footer({ onScrollToSection, onOpenAdmin }: FooterProps) {
   const [emailSub, setEmailSub] = useState("");
   const [subSuccess, setSubSuccess] = useState(false);
 
@@ -191,6 +192,13 @@ export default function Footer({ onScrollToSection }: FooterProps) {
         <div className="flex items-center gap-6">
           <a href="#" className="hover:text-apron-peach">Privacy Policy</a>
           <a href="#" className="hover:text-apron-peach">Terms of Dining</a>
+          <button 
+            onClick={onOpenAdmin} 
+            className="hover:text-apron-peach cursor-pointer transition-colors text-left"
+            title="Authorized Staff Portal"
+          >
+            Staff Portal
+          </button>
         </div>
       </div>
     </footer>

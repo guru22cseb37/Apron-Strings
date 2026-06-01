@@ -27,7 +27,8 @@ export default function Navbar({ onOpenCart, onOpenAdmin, onScrollToSection }: N
     aromaProfile, 
     setAromaProfile, 
     audioTrack, 
-    setAudioTrack 
+    setAudioTrack,
+    isAdminAuthed
   } = useApp();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,13 +133,15 @@ export default function Navbar({ onOpenCart, onOpenAdmin, onScrollToSection }: N
           {/* Control Utility Knobs & Cart */}
           <div className="flex items-center gap-2 md:gap-4">
             {/* Admin Dashboard Trigger */}
-            <button
-              onClick={onOpenAdmin}
-              title="Admin Panel"
-              className="relative p-2 rounded-full border border-white/60 bg-white/40 backdrop-blur-md soft-neumorphic hover:text-apron-caramel transition-all duration-300 cursor-pointer text-apron-charcoal flex items-center justify-center hover-magnetic"
-            >
-              <ChefHat className="w-4 h-4 md:w-5 h-5 text-apron-charcoal hover:text-apron-caramel" />
-            </button>
+            {isAdminAuthed && (
+              <button
+                onClick={onOpenAdmin}
+                title="Admin Panel"
+                className="relative p-2 rounded-full border border-white/60 bg-white/40 backdrop-blur-md soft-neumorphic hover:text-apron-caramel transition-all duration-300 cursor-pointer text-apron-charcoal flex items-center justify-center hover-magnetic"
+              >
+                <ChefHat className="w-4 h-4 md:w-5 h-5 text-apron-charcoal hover:text-apron-caramel" />
+              </button>
+            )}
 
 
             {/* Aroma Visualizer Scent Dropdown */}
@@ -322,16 +325,18 @@ export default function Navbar({ onOpenCart, onOpenAdmin, onScrollToSection }: N
                   {item.label}
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAdmin();
-                }}
-                className="flex items-center gap-2 mt-2 py-3 px-4 rounded-xl bg-apron-peach/50 border border-white text-apron-caramel font-medium hover:bg-apron-peach transition-all"
-              >
-                <ChefHat className="w-5 h-5" />
-                Go to Admin Dashboard
-              </button>
+              {isAdminAuthed && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAdmin();
+                  }}
+                  className="flex items-center gap-2 mt-2 py-3 px-4 rounded-xl bg-apron-peach/50 border border-white text-apron-caramel font-medium hover:bg-apron-peach transition-all"
+                >
+                  <ChefHat className="w-5 h-5" />
+                  Go to Admin Dashboard
+                </button>
+              )}
             </nav>
           </motion.div>
         )}

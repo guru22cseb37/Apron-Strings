@@ -65,6 +65,9 @@ interface AppContextType {
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
   deleteProduct: (productId: string) => void;
   updateProductPrice: (productId: string, price: number) => void;
+  isAdminAuthed: boolean;
+  loginAdmin: (password: string) => boolean;
+  logoutAdmin: () => void;
 }
 
 const defaultMenu: MenuItem[] = [
@@ -216,6 +219,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [aromaVisual, setAromaVisual] = useState(true);
   const [aromaProfile, setAromaProfile] = useState<"Vanilla" | "Caramel" | "Chocolate">("Vanilla");
   const [audioTrack, setAudioTrack] = useState<"Bells" | "Waltz" | "Lofi" | "None">("None");
+  const [isAdminAuthed, setIsAdminAuthed] = useState(false);
+
+  // Load auth state from sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("apron_strings_admin_authed");
+      if (saved === "true") {
+        setIsAdminAuthed(true);
+      }
+    }
+  }, []);
+
+  const loginAdmin = (password: string): boolean => {
+    // Elegant client passcode verification
+    if (password === "apronadmin2026") {
+      setIsAdminAuthed(true);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("apron_strings_admin_authed", "true");
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const logoutAdmin = () => {
+    setIsAdminAuthed(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("apron_strings_admin_authed");
+    }
+  };
 
   // Synchronize ambientAudio state with the selected track
   useEffect(() => {
@@ -384,6 +417,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateOrderStatus,
         deleteProduct,
         updateProductPrice,
+        isAdminAuthed,
+        loginAdmin,
+        logoutAdmin,
       }}
     >
       {children}

@@ -24,6 +24,16 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl + Shift + A to open Admin Panel passcode gate
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setAdminOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Smooth scroll handler targeting component IDs
@@ -89,7 +99,10 @@ export default function Home() {
       <Testimonials />
 
       {/* Luxury Footer */}
-      <Footer onScrollToSection={handleScrollToSection} />
+      <Footer 
+        onScrollToSection={handleScrollToSection} 
+        onOpenAdmin={() => setAdminOpen(true)}
+      />
 
       {/* Slide-out Shopping Cart */}
       <CartDrawer

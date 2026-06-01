@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useApp, MenuItem, Order } from "@/context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChefHat, BarChart3, Package, ClipboardList, Plus, Trash2, ArrowUpRight, TrendingUp, Sparkles, Check } from "lucide-react";
+import { X, ChefHat, BarChart3, Package, ClipboardList, Plus, Trash2, ArrowUpRight, TrendingUp, Sparkles, Check, Lock, Unlock, Eye, EyeOff } from "lucide-react";
+import confetti from "canvas-confetti";
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -11,9 +12,47 @@ interface AdminPanelProps {
 }
 
 export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
-  const { menuItems, orders, addProduct, deleteProduct, updateOrderStatus, updateProductPrice } = useApp();
+  const { 
+    menuItems, 
+    orders, 
+    addProduct, 
+    deleteProduct, 
+    updateOrderStatus, 
+    updateProductPrice,
+    isAdminAuthed,
+    loginAdmin,
+    logoutAdmin
+  } = useApp();
   const [tab, setTab] = useState<"analytics" | "products" | "orders">("analytics");
   const [addedItemSuccess, setAddedItemSuccess] = useState(false);
+
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = loginAdmin(password);
+    if (success) {
+      setError(false);
+      setPassword("");
+      try {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#C5A059", "#D6A575", "#FFF3EC", "#FFE8ED"]
+        });
+      } catch (err) {
+        console.error("Confetti error", err);
+      }
+    } else {
+      setError(true);
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+    }
+  };
 
   // New product form states
   const [newProductName, setNewProductName] = useState("");
@@ -60,6 +99,109 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   if (!isOpen) return null;
+
+  if (!isAdminAuthed) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          onClick={onClose}
+          className="absolute inset-0 bg-apron-charcoal/45 backdrop-blur-sm"
+        />
+
+        {/* Login Frame */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className={`relative w-full max-w-md bg-apron-cream/95 backdrop-blur-md rounded-3xl overflow-hidden border border-white shadow-2xl z-10 p-8 text-center flex flex-col items-center gap-6 ${
+            isShaking ? "animate-[bounce_0.5s_ease-in-out]" : ""
+          }`}
+          style={isShaking ? { animation: "shake 0.5s" } : {}}
+        >
+          <style>{`
+            @keyframes shake {
+              0%, 100% { transform: translateX(0); }
+              10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+              20%, 40%, 60%, 80% { transform: translateX(6px); }
+            }
+          `}</style>
+
+          {/* Golden pulsing lock header */}
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full bg-apron-peach border border-white soft-neumorphic flex items-center justify-center text-apron-caramel shadow-sm animate-float">
+              <ChefHat className="w-8 h-8 animate-pulse" />
+            </div>
+            <motion.div 
+              className="absolute -top-1 -right-1 text-apron-gold"
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            >
+              <Sparkles className="w-4 h-4" />
+            </motion.div>
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="font-serif text-2xl font-bold text-apron-charcoal">Strings Staff Gate</h2>
+            <p className="text-xs text-apron-caramel font-semibold uppercase tracking-wider">Authorized Patissier Command Desk</p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit} className="w-full space-y-4">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-apron-charcoal/40">
+                <Lock className="w-4 h-4" />
+              </span>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(false);
+                }}
+                placeholder="Enter Staff Passcode..."
+                className={`w-full py-3.5 pl-10 pr-10 rounded-2xl border bg-white/50 text-sm focus:outline-none focus:border-apron-caramel transition-all text-apron-charcoal font-sans text-center tracking-widest ${
+                  error ? "border-red-400 bg-red-50/20 text-red-700 focus:border-red-400" : "border-white/60"
+                }`}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-apron-charcoal/40 hover:text-apron-caramel cursor-pointer"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {error && (
+              <motion.p 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-[11px] font-sans font-semibold text-red-500 bg-red-50/40 py-1.5 px-3 rounded-lg border border-red-100/50 animate-pulse"
+              >
+                ❌ Access Denied. Invalid credentials.
+              </motion.p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3.5 px-6 rounded-2xl bg-apron-caramel text-white text-xs font-bold uppercase tracking-wider shadow-xs hover-magnetic cursor-pointer flex items-center justify-center gap-2 group transition-all"
+            >
+              <Unlock className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
+              Authenticate Desk
+            </button>
+          </form>
+
+          <button
+            onClick={onClose}
+            className="text-[11px] font-sans font-semibold text-apron-charcoal/40 hover:text-apron-caramel transition-colors cursor-pointer"
+          >
+            ← Return to Patisserie Lounge
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -136,6 +278,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   {activeOrdersCount}
                 </span>
               )}
+            </button>
+
+            {/* Lock/Logout Divider */}
+            <div className="flex-1" />
+
+            <button
+              onClick={() => logoutAdmin()}
+              className="p-3 mt-auto rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-3 cursor-pointer transition-all text-red-500/80 hover:bg-red-50/50 hover:text-red-600 border border-transparent hover:border-red-100/50"
+            >
+              <Lock className="w-4 h-4" />
+              Lock Desk
             </button>
           </div>
 
