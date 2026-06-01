@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp, MenuItem, Order } from "@/context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChefHat, BarChart3, Package, ClipboardList, Plus, Trash2, ArrowUpRight, TrendingUp, Sparkles, Check, Lock, Unlock, Eye, EyeOff } from "lucide-react";
@@ -25,6 +25,24 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   } = useApp();
   const [tab, setTab] = useState<"analytics" | "products" | "orders">("analytics");
   const [addedItemSuccess, setAddedItemSuccess] = useState(false);
+
+  // Lock body scroll and stop Lenis smooth scrolling when admin panel is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      // @ts-ignore
+      window.lenis?.stop();
+    } else {
+      document.body.style.overflow = "";
+      // @ts-ignore
+      window.lenis?.start();
+    }
+    return () => {
+      document.body.style.overflow = "";
+      // @ts-ignore
+      window.lenis?.start();
+    };
+  }, [isOpen]);
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -212,7 +230,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       />
 
       {/* Admin Window Frame */}
-      <div className="relative w-full max-w-5xl bg-apron-cream/95 backdrop-blur-md rounded-3xl overflow-hidden border border-white shadow-2xl z-10 max-h-[92vh] flex flex-col h-[650px] text-left">
+      <div 
+        className="relative w-full max-w-5xl bg-apron-cream/95 backdrop-blur-md rounded-3xl overflow-hidden border border-white shadow-2xl z-10 max-h-[92vh] flex flex-col h-[650px] text-left"
+        data-lenis-prevent
+      >
         
         {/* Header bar */}
         <div className="p-6 border-b border-apron-beige/35 flex items-center justify-between bg-white/40">
@@ -293,7 +314,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           </div>
 
           {/* RIGHT: Content Viewboards */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white/10">
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white/10" data-lenis-prevent>
             
             {/* VIEW 1: ANALYTICS & REVENUE CHARTS */}
             {tab === "analytics" && (
@@ -446,7 +467,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 {/* Catalog Listing */}
                 <div className="space-y-3">
                   <h5 className="font-serif text-base font-bold text-apron-charcoal">Current Menu Listings ({menuItems.length})</h5>
-                  <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2">
+                  <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2" data-lenis-prevent>
                     {menuItems.map((item) => (
                       <div
                         key={item.id}
@@ -499,7 +520,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <div className="space-y-4">
                 <h4 className="font-serif text-lg font-bold text-apron-charcoal mb-4">Active Orders Management Desk</h4>
                 
-                <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2" data-lenis-prevent>
                   {orders.length === 0 ? (
                     <div className="p-8 text-center text-xs text-apron-charcoal/50 font-sans font-light">
                       No customer orders placed yet.
