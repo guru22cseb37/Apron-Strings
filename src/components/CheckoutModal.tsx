@@ -45,6 +45,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
 
   // Step 2: Packaging
   const [giftWrap, setGiftWrap] = useState(false);
@@ -108,6 +110,54 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }
   };
 
+  const sendWhatsAppRedirect = (orderId: string) => {
+    const phoneNumber = "919940716032"; // Admin WhatsApp Phone
+    
+    // Construct items list text
+    const itemsText = cart.map(item => {
+      const customizationText = item.customization 
+        ? `\n   └ 🍦 Cream: ${item.customization.cream || "None"}${item.customization.message ? ` | ✍️ Message: "${item.customization.message}"` : ""}`
+        : "";
+      return `🧁 *${item.product.name}* (x${item.quantity}) - ₹${(item.product.price * item.quantity).toFixed(2)}${customizationText}`;
+    }).join("\n");
+
+    const packagingDetails = [
+      giftWrap ? "🎀 Luxury Satin Gift Wrap (+₹5.00)" : "",
+      candles ? "🕯️ Premium Sparkles & Candles (+₹3.50)" : "",
+      giftCard ? `✉️ Fountain Note: "${giftCardText}" (+₹4.50)` : "",
+    ].filter(Boolean).join("\n");
+
+    // Construct the elegant message
+    const message = `✨ *NEW ORDER PLACED!* 🎂
+-----------------------------------
+👑 *Order Number:* ${orderId}
+👤 *Customer Name:* ${name}
+📧 *Email:* ${email}
+📍 *Delivery Address:* ${address}
+
+📅 *Delivery Date:* ${deliveryDate || "As soon as possible"}
+⏰ *Delivery Time:* ${deliveryTime || "During open hours"}
+
+📦 *Items Ordered:*
+${itemsText}
+
+${packagingDetails ? `🎁 *Premium Packaging:*\n${packagingDetails}\n` : ""}
+-----------------------------------
+🏷️ *Subtotal:* ₹${subtotal.toFixed(2)}
+💸 *Discount:* -₹${discount.toFixed(2)}
+🚚 *Delivery Charges:* ${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+💰 *Total Billed:* *₹${total.toFixed(2)}*
+
+🍰 _Thank you for choosing Apron Strings Bakery!_ 🧑‍🍳`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    if (typeof window !== "undefined") {
+      window.open(whatsappUrl, "_blank");
+    }
+  };
+
   const handlePayment = () => {
     setIsProcessing(true);
 
@@ -150,6 +200,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         }
       };
       frame();
+
+      // Automatically redirect to WhatsApp!
+      sendWhatsAppRedirect(order.id);
 
     }, 2500);
   };
@@ -387,6 +440,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
                   <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <button
+                      onClick={() => sendWhatsAppRedirect(createdOrderNumber)}
+                      className="w-full sm:w-auto py-3.5 px-6 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover-magnetic border border-transparent"
+                    >
+                      <svg 
+                        viewBox="0 0 24 24" 
+                        fill="currentColor" 
+                        className="w-4 h-4 text-white"
+                      >
+                        <path d="M12.031 2c-5.524 0-10 4.476-10 10 0 1.83.493 3.548 1.349 5.029l-1.379 5.041 5.163-1.353c1.42.793 3.037 1.283 4.867 1.283 5.524 0 10-4.476 10-10s-4.476-10-10-10zm.04 17.5a7.46 7.46 0 0 1-3.83-1.049l-.275-.164-2.852.748.761-2.784-.183-.292a7.447 7.447 0 0 1-1.142-3.959c0-4.12 3.351-7.471 7.471-7.471 4.12 0 7.471 3.351 7.471 7.471 0 4.12-3.351 7.471-7.421 7.471zm3.84-5.183c-.21-.105-1.246-.615-1.439-.685-.192-.07-.332-.105-.472.105-.14.21-.543.685-.665.825-.123.14-.246.158-.456.053-.21-.105-.889-.327-1.693-1.042-.625-.558-1.047-1.248-1.17-1.458-.123-.21-.013-.323.092-.428.095-.095.21-.246.315-.368.105-.123.14-.21.21-.35.07-.14.035-.263-.017-.368-.052-.105-.472-1.14-.648-1.56-.172-.411-.343-.356-.472-.363-.12-.006-.259-.007-.399-.007-.14 0-.368.053-.56.263-.193.21-.737.72-.737 1.754s.754 2.035.859 2.175c.105.14 1.484 2.266 3.59 3.175.5.216.89.346 1.196.443.504.16 1.036.136 1.426.079.435-.064 1.246-.51 1.421-.998.175-.488.175-.91.123-.998-.053-.088-.193-.14-.403-.245z"/>
+                      </svg>
+                      Share via WhatsApp
+                    </button>
+
+                    <button
                       onClick={downloadOrderCertificate}
                       className="w-full sm:w-auto py-3.5 px-6 rounded-full border border-apron-caramel text-apron-caramel text-xs font-semibold uppercase tracking-wider hover:bg-apron-peach/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover-magnetic"
                     >
@@ -491,6 +558,29 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             ))}
                           </div>
                         )}
+                      </div>
+
+                      {/* Delivery Date & Time Pickers */}
+                      <div className="grid grid-cols-2 gap-4 pt-1">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] uppercase font-bold tracking-wider text-apron-caramel">Delivery Date</label>
+                          <input
+                            type="date"
+                            value={deliveryDate}
+                            onChange={(e) => setDeliveryDate(e.target.value)}
+                            min={new Date().toISOString().split("T")[0]}
+                            className="w-full py-3.5 px-5 rounded-2xl border border-white/60 bg-white/40 soft-neumorphic text-xs text-apron-charcoal focus:outline-none focus:border-apron-caramel/40 cursor-pointer"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] uppercase font-bold tracking-wider text-apron-caramel">Delivery Time</label>
+                          <input
+                            type="time"
+                            value={deliveryTime}
+                            onChange={(e) => setDeliveryTime(e.target.value)}
+                            className="w-full py-3.5 px-5 rounded-2xl border border-white/60 bg-white/40 soft-neumorphic text-xs text-apron-charcoal focus:outline-none focus:border-apron-caramel/40 cursor-pointer"
+                          />
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -862,7 +952,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
                     {step < 3 ? (
                       <button
-                        disabled={step === 1 && (!name || !email || !address)}
+                        disabled={step === 1 && (!name || !email || !address || !deliveryDate || !deliveryTime)}
                         onClick={() => setStep(step + 1)}
                         className="btn-liquid py-3 px-8 rounded-full bg-apron-caramel text-white text-xs font-semibold uppercase tracking-wider shadow-md hover-magnetic cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
                       >
