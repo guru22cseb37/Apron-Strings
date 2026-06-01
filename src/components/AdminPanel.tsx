@@ -565,7 +565,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         </div>
 
                         {/* Customer block info */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px] text-apron-charcoal/65 font-sans leading-relaxed">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-[10px] text-apron-charcoal/65 font-sans leading-relaxed">
                           <div>
                             <span className="block font-bold uppercase text-apron-caramel/80">Customer</span>
                             <span className="font-semibold text-apron-charcoal">{ord.customerName}</span>
@@ -577,6 +577,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           <div>
                             <span className="block font-bold uppercase text-apron-caramel/80">Location Address</span>
                             <span className="font-semibold text-apron-charcoal line-clamp-1">{ord.address}</span>
+                          </div>
+                          <div>
+                            <span className="block font-bold uppercase text-[#D6A575]/80">Delivery Target</span>
+                            <span className="font-semibold text-[#D6A575] flex items-center gap-1 font-bold">
+                              📅 {ord.deliveryDate || "ASAP"} | ⏰ {ord.deliveryTime || "Anytime"}
+                            </span>
                           </div>
                         </div>
 

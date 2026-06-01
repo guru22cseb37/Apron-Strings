@@ -163,7 +163,7 @@ ${packagingDetails ? `🎁 *Premium Packaging:*\n${packagingDetails}\n` : ""}
 
     setTimeout(() => {
       // Create order entry in AppContext
-      const order = createOrder(name, email, address);
+      const order = createOrder(name, email, address, deliveryDate, deliveryTime);
       setCreatedOrderNumber(order.id);
       setIsProcessing(false);
       setIsSuccess(true);

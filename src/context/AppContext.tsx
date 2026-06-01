@@ -39,6 +39,8 @@ export interface Order {
   total: number;
   status: "Pending" | "Baking" | "Out for Delivery" | "Delivered";
   createdAt: string;
+  deliveryDate?: string;
+  deliveryTime?: string;
 }
 
 interface AppContextType {
@@ -60,7 +62,7 @@ interface AppContextType {
   removeFromCart: (cartItemId: string) => void;
   updateCartQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
-  createOrder: (name: string, email: string, address: string) => Order;
+  createOrder: (name: string, email: string, address: string, deliveryDate?: string, deliveryTime?: string) => Order;
   addProduct: (product: Omit<MenuItem, "id" | "rating">) => void;
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
   deleteProduct: (productId: string) => void;
@@ -332,7 +334,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCouponCode("");
   };
 
-  const createOrder = (name: string, email: string, address: string): Order => {
+  const createOrder = (name: string, email: string, address: string, deliveryDate?: string, deliveryTime?: string): Order => {
     const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const discount = couponApplied ? subtotal * 0.1 : 0;
     const total = subtotal - discount;
@@ -348,6 +350,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       total,
       status: "Pending",
       createdAt: new Date().toISOString(),
+      deliveryDate,
+      deliveryTime,
     };
 
     const updatedOrders = [newOrder, ...orders];
