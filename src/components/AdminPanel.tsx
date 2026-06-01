@@ -586,6 +586,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           </div>
                         </div>
 
+                        {/* Packaging and Custom Note Section */}
+                        {(ord.giftWrap || ord.candles || ord.giftCardText) && (
+                          <div className="p-3.5 rounded-xl border border-white bg-white/50 backdrop-blur-sm space-y-2 text-xs font-sans text-left">
+                            <span className="block text-[8px] uppercase tracking-wider font-bold text-[#d6a575]">🎁 Premium Gift Add-ons:</span>
+                            <div className="flex flex-wrap gap-2 text-[10px] font-semibold">
+                              {ord.giftWrap && <span className="bg-[#fff3ec] border border-[#d6a575]/25 text-[#d6a575] py-0.5 px-2.5 rounded-xl shadow-3xs">🎀 Satin Gift Wrap</span>}
+                              {ord.candles && <span className="bg-[#fff3ec] border border-[#d6a575]/25 text-[#d6a575] py-0.5 px-2.5 rounded-xl shadow-3xs">🕯️ Birthday Sparkles</span>}
+                            </div>
+                            {ord.giftCardText && (
+                              <div className="bg-white/75 p-3 rounded-xl border border-[#d6a575]/10 mt-1 shadow-3xs">
+                                <span className="block text-[8px] uppercase tracking-wider font-bold text-[#d6a575] mb-1">✍️ Fountain Handwritten Note:</span>
+                                <p className="italic font-serif text-[11px] text-apron-chocolate font-medium leading-relaxed">
+                                  "{ord.giftCardText}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Items recap lists */}
                         <div className="p-3.5 rounded-xl border border-white bg-white/70 backdrop-blur-sm space-y-2">
                           <span className="block text-[8px] uppercase tracking-wider font-bold text-apron-caramel">Items Ordered:</span>
