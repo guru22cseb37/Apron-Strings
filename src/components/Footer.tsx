@@ -62,7 +62,7 @@ export default function Footer({ onScrollToSection, onOpenAdmin }: FooterProps) 
   ];
 
   return (
-    <footer className="bg-apron-charcoal text-white/80 py-20 px-6 md:px-12 relative z-10 border-t border-white/5">
+    <footer className="bg-apron-charcoal text-white/80 pt-20 pb-32 md:pb-20 px-6 md:px-12 relative z-10 border-t border-white/5">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
         
         {/* Col 1: Brand & Socials */}
